@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>StickerChat ✨</title>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:ital,wght@0,400;0,600;0,700;0,800;0,900;1,700&family=Righteous&family=Dancing+Script:wght@700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <!-- BLOOM BANNER -->
+    <div class="bloom-banner" id="bloomBanner" onclick="triggerBloom()">
+        <div class="bloom-text">tap to bloom 🌸</div>
+        <div class="bloom-petals-preview">🌸🌺🌼</div>
+    </div>
+
+    <!-- BLOOM OVERLAY -->
+    <div class="bloom-overlay" id="bloomOverlay">
+        <div class="bloom-stage">
+            <div class="bloom-close" onclick="closeBloom()">✕</div>
+            <canvas id="bloomCanvas"></canvas>
+            <div class="bloom-center-figure" id="bloomFigure">
+                <div class="bloom-glow-ring"></div>
+                <div class="bloom-women-emoji">🌺</div>
+                <div class="bloom-petals-container" id="bloomPetals"></div>
+                <div class="bloom-sparkles" id="bloomSparkles"></div>
+            </div>
+            <div class="bloom-quote" id="bloomQuote">
+                <span class="bloom-quote-text">tu hai toh sab hai bestie 💖</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="sparkle-bg">
+        <div class="orb orb1"></div>
+        <div class="orb orb2"></div>
+        <div class="orb orb3"></div>
+        <canvas id="particles"></canvas>
+    </div>
+
+    <div class="app-shell">
+        <!-- SIDEBAR -->
+        <aside class="sidebar">
+            <div class="sidebar-top">
+                <div class="app-logo">✨ Sticker-Chat</div>
+                <div class="profile-card">
+                    <div class="avatar-wrap">
+                        <div class="avatar-emoji">🌸</div>
+                        <div class="status-dot"></div>
+                    </div>
+                    <div class="profile-info">
+                        <div class="profile-name">Shreya</div>
+                        <div class="profile-status">main character 💅</div>
+                    </div>
+                </div>
+
+                <div class="divider"></div>
+                <div class="sidebar-label">Mood Board 💅</div>
+                <div class="mood-chips" id="moodChips">
+                    <div class="mood-chip active" onclick="setMoodFilter('all')">Sab 🤌</div>
+                    <div class="mood-chip" onclick="setMoodFilter('happy')">Khushi 😄</div>
+                    <div class="mood-chip" onclick="setMoodFilter('slay')">Slay 💅</div>
+                    <div class="mood-chip" onclick="setMoodFilter('judging')">Judge 👀</div>
+                    <div class="mood-chip" onclick="setMoodFilter('chaos')">Pagalpan 💀</div>
+                    <div class="mood-chip" onclick="setMoodFilter('love')">Pyaar 🫶</div>
+                </div>
+
+                <div class="divider"></div>
+                <div class="sidebar-label">Quick Reactions</div>
+                <div class="quick-stickers" id="quickStickers"></div>
+            </div>
+            <div class="sidebar-bottom">
+                <div class="bestie-vibe-card">
+                    <div class="bestie-vibe-inner">
+                        <span class="bestie-vibe-icon">🧚‍♀️</span>
+                        <div>
+                            <div class="bestie-vibe-name">Trushant's Bot</div>
+                            <div class="bestie-vibe-sub">tere liye hi bana hai 💕</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </aside>
+
+        <!-- MAIN CHAT -->
+        <div class="chat-panel">
+            <header class="chat-header">
+                <div class="header-left">
+                    <button class="back-btn" onclick="toggleSidebar()">☰</button>
+                    <div class="avatar-wrap small" onclick="triggerBloom()" style="cursor:pointer" title="Bloom karo 🌸">
+                        <div class="avatar-emoji small-av">🌸</div>
+                        <div class="status-dot small-dot"></div>
+                    </div>
+                    <div class="header-info">
+                        <div class="header-name">Shreya ✨</div>
+                        <div class="header-sub" id="headerSub">Online & teri baaton mein busy 👀</div>
+                    </div>
+                </div>
+                <div class="header-right">
+                    <button class="icon-btn bloom-header-btn" onclick="triggerBloom()" title="Bloom 🌸">🌺</button>
+                    <button class="icon-btn" onclick="clearChat()" title="Clear chat">🗑️</button>
+                </div>
+            </header>
+
+            <main id="chatArea" class="chat-area">
+                <div class="day-label">Aaj ka din ✨</div>
+                <div class="bubble-row bot">
+                    <div class="bubble bot">
+                        Heyy Shreya!! Sticker Bhej yaha pe ✨
+                    </div>
+                </div>
+            </main>
+
+            <!-- TOOLBAR -->
+            <div class="toolbar" id="toolbar">
+                <button class="tool-btn" onclick="document.getElementById('imgUpload').click()" title="Photo bhejo">📷</button>
+                <input type="file" id="imgUpload" accept="image/*" style="display:none" onchange="handleFileUpload(event,'image')">
+
+                <button class="tool-btn" onclick="document.getElementById('fileUpload').click()" title="File attach karo">📎</button>
+                <input type="file" id="fileUpload" accept="*/*" style="display:none" onchange="handleFileUpload(event,'file')">
+
+                <button class="tool-btn" onclick="toggleStickerPicker()" title="Sticker picker" id="stickerPickerBtn">🎭</button>
+                <button class="tool-btn" onclick="toggleEmojiBar()" title="Emoji">😍</button>
+                <button class="tool-btn" onclick="triggerBloom()" title="Bloom 🌸">🌸</button>
+            </div>
+
+            <!-- STICKER TRAY -->
+            <div class="sticker-tray" id="stickerTray">
+                <div class="tray-header">
+                    <span>Sticker Packs 🎪</span>
+                    <button onclick="toggleStickerPicker()" class="close-tray">✕</button>
+                </div>
+                <div class="tray-tabs">
+                    <button class="tray-tab active" onclick="switchPack('vibes')">Vibes</button>
+                    <button class="tray-tab" onclick="switchPack('savage')">Savage</button>
+                    <button class="tray-tab" onclick="switchPack('soft')">Soft</button>
+                    <button class="tray-tab" onclick="switchPack('chaos')">Chaos</button>
+                </div>
+                <div class="sticker-grid" id="stickerGrid"></div>
+            </div>
+
+            <!-- EMOJI BAR -->
+            <div class="emoji-bar" id="emojiBar">
+                <span onclick="insertEmoji('😭')">😭</span><span onclick="insertEmoji('💀')">💀</span>
+                <span onclick="insertEmoji('✨')">✨</span><span onclick="insertEmoji('💅')">💅</span>
+                <span onclick="insertEmoji('🌸')">🌸</span><span onclick="insertEmoji('🫶')">🫶</span>
+                <span onclick="insertEmoji('🤌')">🤌</span><span onclick="insertEmoji('👁️👄👁️')">👁️👄👁️</span>
+                <span onclick="insertEmoji('🧚‍♀️')">🧚‍♀️</span><span onclick="insertEmoji('🫠')">🫠</span>
+                <span onclick="insertEmoji('🥺')">🥺</span><span onclick="insertEmoji('🔥')">🔥</span>
+                <span onclick="insertEmoji('😤')">😤</span><span onclick="insertEmoji('🤭')">🤭</span>
+                <span onclick="insertEmoji('🎭')">🎭</span><span onclick="insertEmoji('👑')">👑</span>
+                <span onclick="insertEmoji('😝')">😝</span><span onclick="insertEmoji('🫦')">🫦</span>
+            </div>
+
+            <footer class="input-zone">
+                <div class="input-bar">
+                    <textarea id="inputBox" placeholder="Bol bestie, kya chal raha hai... ☕" rows="1" oninput="autoResize(this)" onkeydown="handleKey(event)"></textarea>
+                    <button id="sendBtn" onclick="handleSend()" class="send-btn">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                            <path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"/>
+                        </svg>
+                    </button>
+                </div>
+            </footer>
+        </div>
+    </div>
+
+    <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
+
+    <script src="script.js"></script>
+</body>
+</html>
