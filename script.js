@@ -4,11 +4,8 @@
 
 const MY_NAME = "Trushant";
 
-// 🔥 PASTE YOUR GEMINI API KEY
-const GEMINI_API_KEY = "AIzaSyBvo6p9LBruiBYDOFygIbDlw0RXe147xB4";
-
 // 🔥 GIPHY API KEY
-const GIPHY_API_KEY = "5zSsbJ3rQNHr4BejFufjCY4oCINkiz6H";
+const GIPHY_API_KEY = "9fzvGG1gWJmuHsc5KvM6hPrL1yBAp7gF";
 
 // ─────────────────────────────────────────────
 // GIPHY SEARCHES
@@ -27,6 +24,45 @@ const MOOD_QUERIES = {
     sarcasm: "eye roll sarcastic meme",
     default: "cute funny reaction meme"
 };
+
+// ─────────────────────────────────────────────
+// KEYWORD → GIPHY QUERY MAP (sticker-only replies)
+// ─────────────────────────────────────────────
+
+const KEYWORD_STICKER_MAP = [
+    { test: /hi|hello|hey|heyy|hii|hlo|hola|namaste|namaskar|sup|wassup|kya chal/,
+      queries: ["cute baby waving hello", "baby hello waving meme", "cute toddler waving hi"] },
+    { test: /love you|pyaar|i love|luv u|dil|mohabbat|ishq/,
+      queries: ["cute baby blowing kisses", "baby heart love cute", "cute toddler love meme"] },
+    { test: /sad|dukhi|ro rahi|rona|cry|crying|depressed|udas|bura lag|hurt/,
+      queries: ["cute baby crying sad meme", "sad baby pouting meme", "crying toddler meme"] },
+    { test: /gussa|angry|frustrated|irritated|pakao/,
+      queries: ["angry baby meme funny", "mad toddler angry face", "baby tantrum meme"] },
+    { test: /lol|lmao|haha|hehe|funny|hilarious|hassi|hans/,
+      queries: ["baby laughing hysterically meme", "toddler laughing cute meme", "cute baby giggling meme"] },
+    { test: /khana|food|bhook|hungry|pizza|biryani|maggi|chai|coffee/,
+      queries: ["cute baby eating meme", "toddler eating food cute", "baby nom nom meme"] },
+    { test: /bored|bore|kuch nahi|nothing|khali|time pass/,
+      queries: ["bored baby meme", "cute toddler bored face", "baby yawning bored meme"] },
+    { test: /exam|padhai|college|school|notes|assignment|marks/,
+      queries: ["baby studying meme funny", "toddler serious studying", "cute baby reading glasses"] },
+    { test: /crush|boy|ladka|like karna|propose|date|bf|boyfriend/,
+      queries: ["baby in love meme cute", "toddler crush shy meme", "cute baby blushing meme"] },
+    { test: /slay|looking good|hot|cute|gorgeous|beautiful|sundar|queen/,
+      queries: ["baby diva sunglasses slay", "cute toddler slay meme", "baby queen crown cute"] },
+    { test: /thanks|shukriya|thank you|ty|thanku/,
+      queries: ["cute baby thank you meme", "toddler thankful clapping cute", "baby grateful meme"] },
+    { test: /bye|alvida|goodbye|baad mein|later|ciao|tata/,
+      queries: ["baby waving goodbye cute", "cute toddler bye bye waving", "baby goodbye meme"] },
+    { test: /neend nahi|so nahi|raat ko|insomnia|late night/,
+      queries: ["sleepy baby meme night", "toddler tired sleepy meme", "cute baby sleepy eyes"] },
+    { test: /bahut smart|genius|intelligent|bohot smart/,
+      queries: ["baby genius meme funny", "cute toddler smart glasses meme", "baby professor funny"] },
+    { test: /nalayak|bewakoof|stupid|idiot|pagal|ullu/,
+      queries: ["baby shocked face meme", "toddler surprised reaction", "cute baby wide eyes meme"] },
+    { test: /ghar|home|mummy|papa|family|bhai|sister|behen/,
+      queries: ["cute baby family meme", "toddler mama papa meme", "baby family adorable"] },
+];
 
 // ─────────────────────────────────────────────
 // QUICK STICKER MOODS
@@ -272,91 +308,42 @@ async function handleSend() {
     autoResize(input);
     showTyping();
 
-    try {
-        let result;
-        if (GEMINI_API_KEY && GEMINI_API_KEY !== "PASTE_GEMINI_API_KEY") {
-            result = await callGeminiAPI(text);
-        } else {
-            result = getLocalFallback(text);
-        }
-        hideTyping();
-        await appendBotReply(result.message, result.mood);
-    } catch (err) {
-        console.error("Gemini failed:", err);
-        hideTyping();
-        const fallback = getLocalFallback(text);
-        await appendBotReply(fallback.message, fallback.mood);
-    }
+    const query = getStickerQuery(text);
+    const url = await fetchStickerByQuery(query);
+    hideTyping();
+    if (url) appendImageSticker('bot', url);
 }
 
 // ─────────────────────────────────────────────
-// GEMINI API - HINGLISH PERSONALITY
+// KEYWORD → STICKER QUERY
 // ─────────────────────────────────────────────
 
-async function callGeminiAPI(userText) {
-const prompt = `
-You are Trushant's online best friend chatbot.
+function getStickerQuery(text) {
+    const lower = text.toLowerCase();
+    for (const entry of KEYWORD_STICKER_MAP) {
+        if (entry.test.test(lower)) {
+            return entry.queries[Math.floor(Math.random() * entry.queries.length)];
+        }
+    }
+    // Default: cute baby reaction
+    const defaults = [
+        "cute baby reaction meme",
+        "cute toddler funny face meme",
+        "baby surprised meme cute",
+        "adorable baby confused meme",
+        "cute baby clapping meme"
+    ];
+    return defaults[Math.floor(Math.random() * defaults.length)];
+}
 
-Personality:
-- Dry humor
-- Low effort replies
-- Funny without trying too hard
-- Uses short casual Hinglish
-- Replies like a real friend, not an AI assistant
-- Sometimes sarcastic
-- Sometimes caring in a subtle way
-- Never overly motivational
-- Never too cringe or dramatic
-- Uses minimal emojis
-- Feels like a real late-night friend chat
-
-Reply style:
-- 1 short sentence mostly
-- Sometimes just reactions
-- Sometimes roast the user playfully
-- Sometimes supportive in a casual way
-
-Examples:
-User: "maine khana nahi khaya"
-Reply: "haan phir baad mein headache hoga 👍"
-
-User: "sad hu"
-Reply: "idhar aa bakchodi mat kar, kya hua"
-
-User: "dekh ye meme"
-Reply: "yeh literally tera face hai 😭"
-
-User: "tu achi hai"
-Reply: "minimum requirement puri kar raha hu 👍"
-
-User: "goodnight"
-Reply: "haan soja ab, overthink mat kar"
-
-Mood options:
-happy, judging, chaos, sad, love, sarcasm, confused
-
-Return ONLY JSON:
-{"message":"reply here","mood":"happy"}
-
-User said: "${userText}"
-`;
-
-    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_API_KEY}`;
-
-    const response = await fetch(url, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-            contents: [{ parts: [{ text: prompt }] }]
-        })
-    });
-
-    if (!response.ok) throw new Error("Gemini Error " + response.status);
-
+// Fetch sticker by a direct search query string
+async function fetchStickerByQuery(query) {
+    const url = `https://api.giphy.com/v1/gifs/search?api_key=${GIPHY_API_KEY}&q=${encodeURIComponent(query)}&limit=25&rating=g`;
+    const response = await fetch(url);
     const data = await response.json();
-    let text = data.candidates[0].content.parts[0].text;
-    text = text.replace(/```json/g,'').replace(/```/g,'').trim();
-    return JSON.parse(text);
+    if (!data.data || !data.data.length) return null;
+    const random = data.data[Math.floor(Math.random() * data.data.length)];
+    return random.images.fixed_height.url;
 }
 
 // ─────────────────────────────────────────────
@@ -373,22 +360,7 @@ async function fetchSticker(mood = "default") {
     return random.images.fixed_height.url;
 }
 
-// ─────────────────────────────────────────────
-// BOT MESSAGE
-// ─────────────────────────────────────────────
-
-async function appendBotReply(message, mood) {
-    const area = document.getElementById('chatArea');
-
-    const textRow = document.createElement('div');
-    textRow.className = 'bubble-row bot';
-    textRow.innerHTML = `<div class="bubble bot">${message}</div>`;
-    area.appendChild(textRow);
-    scrollToBottom();
-
-    const stickerUrl = await fetchSticker(mood);
-    if (stickerUrl) appendImageSticker('bot', stickerUrl);
-}
+// Bot replies sticker-only — see handleSend which calls appendImageSticker directly
 
 // ─────────────────────────────────────────────
 // USER MESSAGE
@@ -418,196 +390,6 @@ function appendImageSticker(sender, url) {
     scrollToBottom();
 }
 
-// ─────────────────────────────────────────────
-// HINGLISH HARDCODED FALLBACKS
-// ─────────────────────────────────────────────
-
-function getLocalFallback(text) {
-    const lower = text.toLowerCase();
-
-    // ── GREETINGS ──
-    if (/hi|hello|hey|heyy|hii|hlo|hola|namaste|namaskar|sup|wassup|kya chal/.test(lower)) {
-        const replies = [
-            { message: "arre aagayi tu! kahan thi itni der? 😤", mood: "happy" },
-            { message: "heyyyy bestie!! aaj kya mast gossip hai? 🤌", mood: "happy" },
-            { message: "aayi? chaliye, drama shuru karte hain 😂", mood: "happy" },
-            { message: "nikal le, kya scene hai aaj ka? ✨", mood: "slay" }
-        ];
-        return replies[Math.floor(Math.random() * replies.length)];
-    }
-
-    // ── SARCASM: "bahut smart/intelligent/genius" ──
-    if (/bahut smart|kitni smart|genius|bahut intelligent|bohot smart/.test(lower)) {
-        return {
-            message: "haan main hi toh hun is duniya ki hope 💅 NASA bula raha tha mujhe",
-            mood: "sarcasm"
-        };
-    }
-
-    // ── "NALAYAK / BEWAKOOF / STUPID" ──
-    if (/nalayak|bewakoof|stupid|idiot|pagal|ullu|gadha|bakwas kar/.test(lower)) {
-        const replies = [
-            { message: "haa hu kya karegi 😝 mujhe toh award milna chahiye nalayak ka", mood: "savage" },
-            { message: "sun lu ek baar - tu bhi koi kam nahi hai 💀", mood: "judging" },
-            { message: "tera dil toot gaya mujhe yeh sunkye? 🥺 nahi, toh chal phir", mood: "sarcasm" }
-        ];
-        return replies[Math.floor(Math.random() * replies.length)];
-    }
-
-    // ── "BAHUT LUCKY" ──
-    if (/kitni lucky|bahut lucky|bohot lucky|lucky hai/.test(lower)) {
-        return {
-            message: "teri nazar laga di na ab sab kuch theek ho jayega 🙄",
-            mood: "sarcasm"
-        };
-    }
-
-    // ── "KITNA KAAM KIYA" ──
-    if (/kitna kaam|bahut kaam|bohot kaam|so hard|kaam kiya/.test(lower)) {
-        return {
-            message: "haan bhai NASA ka invitation toh pakka aa raha hai 💀✨",
-            mood: "sarcasm"
-        };
-    }
-
-    // ── LOVE / PYAAR ──
-    if (/love you|pyaar|i love|luv u|dil|❤|💕|mohabbat|ishq/.test(lower)) {
-        const replies = [
-            { message: "aye tere se kaun lad sakta hai, love you too 🫶", mood: "love" },
-            { message: "acha acha theek hai, main bhi tujhse pyaar karti hun 😭💕", mood: "love" },
-            { message: "yeh sunkye dil pighal gaya mera 🥺 chal hug de", mood: "love" }
-        ];
-        return replies[Math.floor(Math.random() * replies.length)];
-    }
-
-    // ── SAD / RO RAHI ──
-    if (/sad|dukhi|ro rahi|rona|cry|crying|depressed|udas|bura lag|hurt/.test(lower)) {
-        const replies = [
-            { message: "yaar kise marun bata 😤 kya hua? bol mujhe", mood: "sad" },
-            { message: "arre ruk main hun na, kya scene hai bata 🥺", mood: "sad" },
-            { message: "aaja ek hi baar sab bol de, main judge nahi karungi... maybe 💀", mood: "sad" }
-        ];
-        return replies[Math.floor(Math.random() * replies.length)];
-    }
-
-    // ── ANGRY / GUSSA ──
-    if (/gussa|angry|ghabra|frustrated|khon khaulna|irritated|pakao|bakwas/.test(lower)) {
-        const replies = [
-            { message: "ho kya raha hai, sab pagal ho gaye hain kya 😤", mood: "angry" },
-            { message: "yaar chill maar, woh tere layak nahi tha waise bhi 💅", mood: "slay" },
-            { message: "bol na kya hua, main bhi gusse mein aa jaati hun tere saath 💀", mood: "angry" }
-        ];
-        return replies[Math.floor(Math.random() * replies.length)];
-    }
-
-    // ── FOOD / KHANA ──
-    if (/khana|food|bhook|hungry|khaana|pizza|biryani|maggi|chai|coffee|pani puri/.test(lower)) {
-        const replies = [
-            { message: "yaar ab tu ne yaad dilaya, mujhe bhi bhook lag rahi hai 😭", mood: "chaos" },
-            { message: "biryani ki baat mat kar, dil toot jaata hai mera 💀", mood: "chaos" },
-            { message: "chai piyenge? virtual wala sahi 🫖✨", mood: "happy" }
-        ];
-        return replies[Math.floor(Math.random() * replies.length)];
-    }
-
-    // ── BORED / BORE ──
-    if (/bored|bore|kuch nahi|nothing|khali|time pass|free hun/.test(lower)) {
-        const replies = [
-            { message: "chal gossip karte hain, teri zindagi mein koi toh drama hoga 👀", mood: "judging" },
-            { message: "bored? ruk main itna interesting hun na ki bore nahi hongi 💅", mood: "slay" },
-            { message: "yaar hum dono bored, iska matlab masti ka time aa gaya 😂", mood: "chaos" }
-        ];
-        return replies[Math.floor(Math.random() * replies.length)];
-    }
-
-    // ── RELATABLE STRUGGLE ──
-    if (/neend nahi|so nahi|raat ko|nahi so saki|insomnia|late night/.test(lower)) {
-        return {
-            message: "3 baje wali baat alag hi hoti hai yaar, hum hi hain ek doosre ke 💕",
-            mood: "love"
-        };
-    }
-
-    // ── SCHOOL / COLLEGE / EXAM ──
-    if (/exam|padhai|college|school|notes|assignment|marks|result/.test(lower)) {
-        const replies = [
-            { message: "padh le yaar varna mummy ki daant sunni padegi, pata hai tujhe 😂", mood: "judging" },
-            { message: "exam? kal padh lena, aaj mood nahi hai na mera bhi 💀", mood: "chaos" },
-            { message: "notes chahiye? main bhi nahi padhi hoon sach bolunga 😭", mood: "chaos" }
-        ];
-        return replies[Math.floor(Math.random() * replies.length)];
-    }
-
-    // ── CRUSH / BOY ──
-    if (/crush|boy|ladka|banda|like karna|propose|date|bf|boyfriend/.test(lower)) {
-        const replies = [
-            { message: "OHHH bata bata, kaun hai woh? details chahiye mujhe ABHI 👀", mood: "chaos" },
-            { message: "main already judge kar rahi hun, bata toh sahi 😏", mood: "judging" },
-            { message: "woh layak bhi hai tere, warna main nahi sunne wali 💅", mood: "slay" }
-        ];
-        return replies[Math.floor(Math.random() * replies.length)];
-    }
-
-    // ── SLAY / LOOKING GOOD ──
-    if (/slay|looking good|hot|cute|gorgeous|beautiful|sundar|khoobsurat|fit lag rahi|queen/.test(lower)) {
-        const replies = [
-            { message: "QUEEN ENERGY ON FIRE 🔥 teri vibe hi alag hai", mood: "slay" },
-            { message: "haan toh? mirror ko bhi pata hai 💅✨", mood: "slay" },
-            { message: "sab dekh rahe hain, aur hone bhi chahiye 👑", mood: "slay" }
-        ];
-        return replies[Math.floor(Math.random() * replies.length)];
-    }
-
-    // ── LOL / HAHA ──
-    if (/lol|lmao|haha|hehe|😂|😹|funny|hilarious|hassi|hans/.test(lower)) {
-        const replies = [
-            { message: "yaar ruk pagal ho jaaungi main haste haste 💀😂", mood: "chaos" },
-            { message: "PLEASEEE 😭 main serious baat karne ki koshish kar rahi thi", mood: "chaos" },
-            { message: "okay okay theek hai 😂 tu hi entertaining hai toh", mood: "happy" }
-        ];
-        return replies[Math.floor(Math.random() * replies.length)];
-    }
-
-    // ── THANKS ──
-    if (/thanks|shukriya|thank you|dhanyawad|ty|thanku/.test(lower)) {
-        const replies = [
-            { message: "arre yaar main hun hi tere liye 🫶 thanks nahi bolte besties ko", mood: "love" },
-            { message: "okay okay mein collect kar rahi hun tere thanks 💅 aur maang laungi ek din", mood: "slay" }
-        ];
-        return replies[Math.floor(Math.random() * replies.length)];
-    }
-
-    // ── BYE / GOODBYE ──
-    if (/bye|alvida|goodbye|baad mein|baad me|later|ciao|tata/.test(lower)) {
-        const replies = [
-            { message: "okay jaa... yaad aayegi 🥺 drama queen 💀", mood: "sad" },
-            { message: "bye bestie 🌸 jaldi wapas aana drama lekar", mood: "happy" }
-        ];
-        return replies[Math.floor(Math.random() * replies.length)];
-    }
-
-    // ── GHAR / HOME ──
-    if (/ghar|home|mummy|papa|family|bhai|sister|behen/.test(lower)) {
-        return {
-            message: "family drama? bata, main popcorn lekar aa jaati hun 🍿👀",
-            mood: "judging"
-        };
-    }
-
-    // ── RANDOM CATCH ALL ──
-    const randomReplies = [
-        { message: "yaar sach mein? aage bol kya hua 😭", mood: "chaos" },
-        { message: "hain? theek se samjha, main thodi confused hun 😂", mood: "confused" },
-        { message: "yeh sunkye mera reaction dekh 👀 bata poora scene", mood: "judging" },
-        { message: "okay okay chill maar, main hun na 🌸", mood: "love" },
-        { message: "toh? drama hai? gossip hai? details? ABHI? 💀", mood: "chaos" },
-        { message: "bestie vibes on 💅 bol kya chal raha hai", mood: "slay" },
-        { message: "yeh valid point hai actually 🤌 aage bol", mood: "happy" },
-        { message: "main judge toh kar rahi hun, but continue kar 😏", mood: "judging" }
-    ];
-
-    return randomReplies[Math.floor(Math.random() * randomReplies.length)];
-}
 
 // ─────────────────────────────────────────────
 // QUICK STICKERS
