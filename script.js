@@ -8,7 +8,7 @@ const MY_NAME = "Trushant";
 const GEMINI_API_KEY = "AIzaSyBvo6p9LBruiBYDOFygIbDlw0RXe147xB4";
 
 // 🔥 GIPHY API KEY
-const GIPHY_API_KEY = "9fzvGG1gWJmuHsc5KvM6hPrL1yBAp7gF";
+const GIPHY_API_KEY = "5zSsbJ3rQNHr4BejFufjCY4oCINkiz6H";
 
 // ─────────────────────────────────────────────
 // GIPHY SEARCHES
@@ -39,14 +39,21 @@ const QUICK_MOODS = ["happy","slay","judging","chaos","love","sad"];
 // ─────────────────────────────────────────────
 
 const BLOOM_QUOTES = [
-    "tu hai toh sab hai bestie 💖",
-    "har din teri wajah se khoobsurat hai 🌸",
-    "tujh jaisi koi nahi duniya mein ✨",
-    "aaj bhi, kal bhi, hamesha 🌺",
-    "tere bina meri life boring thi 💅",
-    "tu meri bestie hai, aur hamesha rahegi 🫶",
-    "sabse pehle tujhe, baaki sab baad mein 💕",
-    "teri hasi duniya ki best cheez hai 🌼"
+    "tu ajeeb hai but theek hai 👍",
+    "main hi effort daal raha hu iss friendship mein 😔",
+    "tere stickers ne mujhe developer bana diya 💀",
+    "tu reply late karti hai but chal maaf kiya",
+    "low maintenance friendship >>>",
+    "tu drama hai but entertaining hai 😭",
+    "emotionally unavailable duo 🤝",
+    "hum dono normal nahi hai honestly",
+    "tu bolti kam hai stickers zyada bhejti hai 🫠",
+    "teri vibe questionable hai but acceptable 👍",
+    "yeh friendship bas sarcasm pe chal rahi hai",
+    "you’re lucky i reply fast 😤",
+    "hum dono ka humour broken hai",
+    "still waiting for one normal conversation 💬",
+    "tu annoying hai but permanent hai 👍"
 ];
 
 // ─────────────────────────────────────────────
@@ -204,9 +211,9 @@ function stopBloomCanvas() {
 // MOOD FILTER
 // ─────────────────────────────────────────────
 
-function setMoodFilter(mood) {
+function setMoodFilter(mood, el) {
     document.querySelectorAll('.mood-chip').forEach(c => c.classList.remove('active'));
-    event.target.classList.add('active');
+    if (el) el.classList.add('active');
 }
 
 // ─────────────────────────────────────────────
@@ -215,19 +222,30 @@ function setMoodFilter(mood) {
 
 window.onload = async () => {
     renderQuickStickers();
-    renderStickerGrid("happy");
+    renderStickerGrid("vibes");
     initParticles();
     updateHeaderSub();
 };
 
 function updateHeaderSub() {
     const subs = [
-        "Online & teri baaton mein busy 👀",
-        "Haan bhai dekh rahi hun 💅",
-        "Bol, kya drama hai aaj 😏",
-        "Aankh bhi nahi jhapki tere liye 🥺",
-        "Available hun, par judge bhi karungi 💀"
+        "still decoding your stickers 👍",
+        "online because sleep schedule destroyed hai",
+        "replying with professional bakchodi",
+        "friendship maintained somehow 💀",
+        "low effort conversations only",
+        "emotionally buffering...",
+        "your unpaid therapist probably",
+        "sending reactions instead of emotions 👍",
+        "existing and replying occasionally",
+        "online but mentally afk",
+        "trying to sound normal since 2024",
+        "sarcasm powered responses active",
+        "typing something unnecessary...",
+        "probably overthinking rn",
+        "this friendship runs on memes"
     ];
+
     const el = document.getElementById('headerSub');
     if (el) {
         setInterval(() => {
@@ -276,36 +294,49 @@ async function handleSend() {
 // ─────────────────────────────────────────────
 
 async function callGeminiAPI(userText) {
-    const prompt = `
-Tu hai "Shreya" - ek desi Gen-Z bestie jo Hinglish mein baat karti hai.
+const prompt = `
+You are Trushant's online best friend chatbot.
 
-Teri personality:
-- Tu funny, savage, dramatic, emotional aur chaotic hai
-- Tu Hinglish mein baat karti hai (Hindi + English mix)
-- Tu SHORT replies deti hai - max 1-2 lines
-- Tu sarcasm samajhti hai aur sarcastic reply deti hai
-- Tu kabhi repetitive nahi hoti - alag alag replies
-- Tu apni bestie (female) se baat kar rahi hai
-- Tu emojis use karti hai but overdo nahi karti
+Personality:
+- Dry humor
+- Low effort replies
+- Funny without trying too hard
+- Uses short casual Hinglish
+- Replies like a real friend, not an AI assistant
+- Sometimes sarcastic
+- Sometimes caring in a subtle way
+- Never overly motivational
+- Never too cringe or dramatic
+- Uses minimal emojis
+- Feels like a real late-night friend chat
 
-SARCASM EXAMPLES:
-- "yaar tu bahut nalayak hai" → "haa hu, kya karegi 😝 mujhe toh award milna chahiye"
-- "tu toh bahut smart hai" (sarcastic) → "pata hai na, main hi toh hu sab ki hope 💅"
-- "kitni lucky hai tu" → "teri nazar laga di na, ab sab theek ho jayega 🙄"
-- "wow kitna kaam kiya" → "haan bhai, NASA ka invitation aa raha hai abhi 💀"
+Reply style:
+- 1 short sentence mostly
+- Sometimes just reactions
+- Sometimes roast the user playfully
+- Sometimes supportive in a casual way
 
-HINGLISH EXAMPLES:
-- "arre yaar" not "oh my god"
-- "kya bakwas hai yeh" not "this is nonsense"
-- "sach bol na" not "tell me the truth"
-- "bilkul nahi" not "absolutely not"
-- "pagal hai kya" not "are you crazy"
+Examples:
+User: "maine khana nahi khaya"
+Reply: "haan phir baad mein headache hoga 👍"
 
-MOOD OPTIONS (pick one that fits):
-happy, slay, judging, chaos, sad, angry, love, savage, confused, sarcasm
+User: "sad hu"
+Reply: "idhar aa bakchodi mat kar, kya hua"
 
-Return ONLY JSON like this:
-{"message":"tere jaisi nalayak aur koi nahi, award lene aa ja 😝","mood":"savage"}
+User: "dekh ye meme"
+Reply: "yeh literally tera face hai 😭"
+
+User: "tu achi hai"
+Reply: "minimum requirement puri kar raha hu 👍"
+
+User: "goodnight"
+Reply: "haan soja ab, overthink mat kar"
+
+Mood options:
+happy, judging, chaos, sad, love, sarcasm, confused
+
+Return ONLY JSON:
+{"message":"reply here","mood":"happy"}
 
 User said: "${userText}"
 `;
@@ -600,7 +631,15 @@ async function renderQuickStickers() {
 // STICKER GRID
 // ─────────────────────────────────────────────
 
-async function renderStickerGrid(mood) {
+const PACK_TO_MOOD = {
+    vibes: 'happy',
+    savage: 'savage',
+    soft: 'love',
+    chaos: 'chaos'
+};
+
+async function renderStickerGrid(pack) {
+    const mood = PACK_TO_MOOD[pack] || pack;
     const grid = document.getElementById('stickerGrid');
     grid.innerHTML = '';
     for (let i = 0; i < 12; i++) {
@@ -621,9 +660,9 @@ async function renderStickerGrid(mood) {
 // SWITCH PACK
 // ─────────────────────────────────────────────
 
-function switchPack(mood) {
+function switchPack(mood, el) {
     document.querySelectorAll('.tray-tab').forEach(btn => btn.classList.remove('active'));
-    event.target.classList.add('active');
+    if (el) el.classList.add('active');
     renderStickerGrid(mood);
 }
 
@@ -632,7 +671,14 @@ function switchPack(mood) {
 // ─────────────────────────────────────────────
 
 function toggleStickerPicker() {
-    document.getElementById('stickerTray').classList.toggle('open');
+    const tray = document.getElementById('stickerTray');
+    const btn = document.getElementById('stickerPickerBtn');
+    tray.classList.toggle('open');
+    btn.classList.toggle('active');
+    // Close emoji bar if open
+    if (tray.classList.contains('open')) {
+        document.getElementById('emojiBar').classList.remove('open');
+    }
 }
 
 // ─────────────────────────────────────────────
@@ -640,7 +686,13 @@ function toggleStickerPicker() {
 // ─────────────────────────────────────────────
 
 function toggleEmojiBar() {
-    document.getElementById('emojiBar').classList.toggle('open');
+    const emojiBar = document.getElementById('emojiBar');
+    emojiBar.classList.toggle('open');
+    // Close sticker tray if open
+    if (emojiBar.classList.contains('open')) {
+        document.getElementById('stickerTray').classList.remove('open');
+        document.getElementById('stickerPickerBtn').classList.remove('active');
+    }
 }
 
 function insertEmoji(emoji) {
@@ -733,6 +785,33 @@ function clearChat() {
 function toggleSidebar() {
     document.querySelector('.sidebar').classList.toggle('open');
     document.getElementById('sidebarOverlay').classList.toggle('open');
+}
+
+const SLEEP_QUOTES = [
+    "soti reh bas 👍",
+    "online kam, sleeping zyada 😭",
+    "professional napper fr",
+    "teri battery life mujhse better hai 💀",
+    "wake up impossible challenge",
+    "raat bhar soti hai fir bhi sleepy 😐",
+    "human being nahi sleeping app hai tu",
+    "active 2 min, sleepy 24 hours",
+    "tu hibernation pe chal rahi hai kya",
+    "sleeping is your full-time job 👍"
+];
+
+function triggerSleepMode() {
+    const overlay = document.getElementById('sleepOverlay');
+    const text = document.getElementById('sleepText');
+
+    text.textContent =
+        SLEEP_QUOTES[Math.floor(Math.random() * SLEEP_QUOTES.length)];
+
+    overlay.classList.add('open');
+}
+
+function closeSleepMode() {
+    document.getElementById('sleepOverlay').classList.remove('open');
 }
 
 // ─────────────────────────────────────────────
