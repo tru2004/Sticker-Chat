@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>StickerChat ✨</title>
     <link href="https://fonts.googleapis.com/css2?family=Nunito:ital,wght@0,400;0,600;0,700;0,800;0,900;1,700&family=Righteous&family=Dancing+Script:wght@700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
@@ -32,6 +32,22 @@
         </div>
     </div>
 
+    <!-- SLEEP MODE — outside sidebar, at root level -->
+    <div class="sleep-overlay" id="sleepOverlay">
+        <div class="sleep-scene">
+            <div class="sleep-close" onclick="closeSleepMode()">✕</div>
+            <div class="sleep-moon">🌙</div>
+            <div class="sleep-girl-wrap">
+                <div class="sleep-bed">🛏️</div>
+                <div class="sleep-girl">😴</div>
+                <div class="sleep-z z1">z</div>
+                <div class="sleep-z z2">z</div>
+                <div class="sleep-z z3">z</div>
+            </div>
+            <div class="sleep-text" id="sleepText">soti reh bas 👍</div>
+        </div>
+    </div>
+
     <div class="sparkle-bg">
         <div class="orb orb1"></div>
         <div class="orb orb2"></div>
@@ -41,7 +57,7 @@
 
     <div class="app-shell">
         <!-- SIDEBAR -->
-        <aside class="sidebar">
+        <aside class="sidebar" id="sidebar">
             <div class="sidebar-top">
                 <div class="app-logo">✨ Sticker-Chat</div>
                 <div class="profile-card">
@@ -58,12 +74,12 @@
                 <div class="divider"></div>
                 <div class="sidebar-label">Mood Board 💅</div>
                 <div class="mood-chips" id="moodChips">
-                    <div class="mood-chip active" onclick="setMoodFilter('all')">Sab 🤌</div>
-                    <div class="mood-chip" onclick="setMoodFilter('happy')">Khushi 😄</div>
-                    <div class="mood-chip" onclick="setMoodFilter('slay')">Slay 💅</div>
-                    <div class="mood-chip" onclick="setMoodFilter('judging')">Judge 👀</div>
-                    <div class="mood-chip" onclick="setMoodFilter('chaos')">Pagalpan 💀</div>
-                    <div class="mood-chip" onclick="setMoodFilter('love')">Pyaar 🫶</div>
+                    <div class="mood-chip active" onclick="setMoodFilter('all', this)">Sab 🤌</div>
+                    <div class="mood-chip" onclick="setMoodFilter('happy', this)">Khushi 😄</div>
+                    <div class="mood-chip" onclick="setMoodFilter('slay', this)">Slay 💅</div>
+                    <div class="mood-chip" onclick="setMoodFilter('judging', this)">Judge 👀</div>
+                    <div class="mood-chip" onclick="setMoodFilter('chaos', this)">Pagalpan 💀</div>
+                    <div class="mood-chip" onclick="setMoodFilter('love', this)">Pyaar 🫶</div>
                 </div>
 
                 <div class="divider"></div>
@@ -84,7 +100,7 @@
         </aside>
 
         <!-- MAIN CHAT -->
-        <div class="chat-panel">
+        <div class="chat-panel" id="chatPanel">
             <header class="chat-header">
                 <div class="header-left">
                     <button class="back-btn" onclick="toggleSidebar()">☰</button>
@@ -99,6 +115,7 @@
                 </div>
                 <div class="header-right">
                     <button class="icon-btn bloom-header-btn" onclick="triggerBloom()" title="Bloom 🌸">🌺</button>
+                    <button class="icon-btn sleep-btn" onclick="triggerSleepMode()" title="Sleep mode">😴</button>
                     <button class="icon-btn" onclick="clearChat()" title="Clear chat">🗑️</button>
                 </div>
             </header>
@@ -112,30 +129,17 @@
                 </div>
             </main>
 
-            <!-- TOOLBAR -->
-            <div class="toolbar" id="toolbar">
-                <button class="tool-btn" onclick="document.getElementById('imgUpload').click()" title="Photo bhejo">📷</button>
-                <input type="file" id="imgUpload" accept="image/*" style="display:none" onchange="handleFileUpload(event,'image')">
-
-                <button class="tool-btn" onclick="document.getElementById('fileUpload').click()" title="File attach karo">📎</button>
-                <input type="file" id="fileUpload" accept="*/*" style="display:none" onchange="handleFileUpload(event,'file')">
-
-                <button class="tool-btn" onclick="toggleStickerPicker()" title="Sticker picker" id="stickerPickerBtn">🎭</button>
-                <button class="tool-btn" onclick="toggleEmojiBar()" title="Emoji">😍</button>
-                <button class="tool-btn" onclick="triggerBloom()" title="Bloom 🌸">🌸</button>
-            </div>
-
-            <!-- STICKER TRAY -->
+            <!-- STICKER TRAY — in normal flow above toolbar -->
             <div class="sticker-tray" id="stickerTray">
                 <div class="tray-header">
                     <span>Sticker Packs 🎪</span>
                     <button onclick="toggleStickerPicker()" class="close-tray">✕</button>
                 </div>
                 <div class="tray-tabs">
-                    <button class="tray-tab active" onclick="switchPack('vibes')">Vibes</button>
-                    <button class="tray-tab" onclick="switchPack('savage')">Savage</button>
-                    <button class="tray-tab" onclick="switchPack('soft')">Soft</button>
-                    <button class="tray-tab" onclick="switchPack('chaos')">Chaos</button>
+                    <button class="tray-tab active" onclick="switchPack('vibes', this)">Vibes</button>
+                    <button class="tray-tab" onclick="switchPack('savage', this)">Savage</button>
+                    <button class="tray-tab" onclick="switchPack('soft', this)">Soft</button>
+                    <button class="tray-tab" onclick="switchPack('chaos', this)">Chaos</button>
                 </div>
                 <div class="sticker-grid" id="stickerGrid"></div>
             </div>
@@ -151,6 +155,19 @@
                 <span onclick="insertEmoji('😤')">😤</span><span onclick="insertEmoji('🤭')">🤭</span>
                 <span onclick="insertEmoji('🎭')">🎭</span><span onclick="insertEmoji('👑')">👑</span>
                 <span onclick="insertEmoji('😝')">😝</span><span onclick="insertEmoji('🫦')">🫦</span>
+            </div>
+
+            <!-- TOOLBAR -->
+            <div class="toolbar" id="toolbar">
+                <button class="tool-btn" onclick="document.getElementById('imgUpload').click()" title="Photo bhejo">📷</button>
+                <input type="file" id="imgUpload" accept="image/*" style="display:none" onchange="handleFileUpload(event,'image')">
+
+                <button class="tool-btn" onclick="document.getElementById('fileUpload').click()" title="File attach karo">📎</button>
+                <input type="file" id="fileUpload" accept="*/*" style="display:none" onchange="handleFileUpload(event,'file')">
+
+                <button class="tool-btn" onclick="toggleStickerPicker()" title="Sticker picker" id="stickerPickerBtn">🎭</button>
+                <button class="tool-btn" onclick="toggleEmojiBar()" title="Emoji">😍</button>
+                <button class="tool-btn" onclick="triggerBloom()" title="Bloom 🌸">🌸</button>
             </div>
 
             <footer class="input-zone">
